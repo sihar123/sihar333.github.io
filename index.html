@@ -1,0 +1,138 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Work Order</title>
+<style>
+:root{--bg:#e9ebef;--paper:#fff;--ink:#111;--line:#222;--head:#1f3a73;--htxt:#fff;--grey:#d9d9d9;--inp:#fff;
+box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--bg:#15171b;--paper:#1e2127;--ink:#e8e8e8;--line:#9aa0aa;--head:#2c4f94;--grey:#2c3038;--inp:#1e2127}}
+:root[data-theme="dark"]{--bg:#15171b;--paper:#1e2127;--ink:#e8e8e8;--line:#9aa0aa;--head:#2c4f94;--grey:#2c3038;--inp:#1e2127}
+*{box-sizing:border-box}
+html,body{margin:0}
+body{background:var(--bg);color:var(--ink);font:10px/1.2 Arial,Helvetica,sans-serif;padding:10px}
+.bar{max-width:820px;margin:0 auto 8px;display:flex;gap:8px;justify-content:flex-end}
+button{padding:6px 12px;border:1px solid var(--line);background:var(--head);color:#fff;border-radius:3px;cursor:pointer;font:inherit;font-size:12px}
+button.g{background:var(--paper);color:var(--ink)}
+.wrap{overflow-x:auto;max-width:820px;margin:0 auto}
+.paper{background:var(--paper);width:100%;min-width:760px;padding:14px 16px 12px;border:1px solid var(--line)}
+.hd{display:grid;grid-template-columns:1fr 1fr 1fr;align-items:start;margin-bottom:8px}
+.kv{display:grid;grid-template-columns:50px 8px 1fr;gap:3px 0;align-items:end;max-width:200px}
+.kv.f{grid-template-columns:78px 8px 110px}
+h1{margin:0 0 6px;font-size:13px;text-align:center}
+.ctr{display:flex;flex-direction:column;align-items:center}
+.ctr .kv{align-self:center}
+table{border-collapse:collapse;width:100%;table-layout:fixed}
+th{background:var(--head);color:var(--htxt);border:1px solid var(--line);padding:2px 1px;font-weight:600;text-align:center;font-size:9px}
+td{border:1px solid var(--line);padding:0;height:17px}
+td.n{text-align:center;background:var(--grey)}
+td.t{text-align:center;font-weight:700}
+td.pct{text-align:center}
+input[type=text],input[type=date]{width:100%;height:100%;min-height:16px;border:0;background:var(--inp);color:var(--ink);font:inherit;padding:1px 3px;outline:0}
+input[type=text]:focus,input[type=date]:focus{background:#fff8c6;color:#000}
+.kv input{border:0;border-bottom:1px solid var(--line)}
+.gap{height:10px}
+.foot{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:10px;align-items:start}
+.dt{width:230px}
+.dt td{height:18px}.dt td:first-child{padding:2px 4px;width:130px}
+.chk{display:flex;align-items:center;gap:6px;margin-top:6px;flex-wrap:wrap}
+.chk input[type=checkbox]{width:15px;height:15px;margin:0}
+.chk .ln{width:120px;border:0;border-bottom:1px solid var(--line);background:transparent;color:var(--ink);font:inherit}
+.sig{width:100%;margin-left:auto}
+.sig th{background:none;color:var(--ink);height:18px;font-size:10px}
+.sig td.s{height:62px}
+.sig td.r{height:18px;text-align:center}
+@media print{body{background:#fff;padding:0}.bar{display:none}.wrap{overflow:visible;max-width:none}.paper{min-width:0;border:1px solid #000}@page{size:A4 portrait;margin:8mm}*{-webkit-print-color-adjust:exact;print-color-adjust:exact}}
+</style>
+</head>
+<body>
+<div class="bar"><button class="g" onclick="clearAll()">Reset</button><button onclick="window.print()">Cetak / Simpan PDF</button></div>
+<div class="wrap"><div class="paper">
+
+<div class="hd">
+ <div class="kv"><b>No</b>:<input type="text"><b>PT</b>:<input type="text"><b>Divisi</b>:<input type="text"><b>Front</b>:<input type="text"><b>Mandor</b>:<input type="text"></div>
+ <div class="ctr"><h1>Work Order</h1>
+  <div class="kv f"><b>Forecast Start</b>:<input type="date"><b>Forecast End</b>:<input type="date"></div></div>
+ <div></div>
+</div>
+
+<table id="op">
+ <colgroup><col style="width:4%"><col style="width:8%"><col style="width:18%"><col style="width:7%"><col style="width:6%"><col style="width:6%"><col style="width:5%"><col style="width:6%"><col style="width:6%"><col style="width:4.5%"><col style="width:29.5%"></colgroup>
+ <thead>
+  <tr><th colspan="11">Operation</th></tr>
+  <tr><th rowspan="3">No</th><th colspan="2">Pekerjaan</th><th colspan="2">Field</th><th rowspan="3">Jml HK</th><th rowspan="3">UoM</th><th colspan="3">Target Kerja</th><th rowspan="3">Keterangan</th></tr>
+  <tr><th rowspan="2">Op Code</th><th rowspan="2">Desc</th><th rowspan="2">Paddock / Block</th><th rowspan="2">Luas Area</th><th rowspan="2">Open</th><th colspan="2">Luas Area</th></tr>
+  <tr><th>Close</th><th>%</th></tr>
+ </thead>
+ <tbody></tbody>
+ <tfoot><tr><td></td><td></td><td class="t">Total</td><td></td><td class="t" id="tLuas"></td><td class="t" id="tHK"></td><td></td><td class="t" id="tOpen"></td><td class="t" id="tClose"></td><td class="t" id="tPct"></td><td></td></tr></tfoot>
+</table>
+<div class="gap"></div>
+<table id="uk"></table>
+<table id="mp" style="border-top:0"></table>
+
+<div class="foot">
+ <div>
+  <table class="dt"><tr><td>Tanggal Open WO</td><td><input type="date"></td></tr><tr><td>Tanggal Closing WO</td><td><input type="date"></td></tr></table>
+  <div style="margin-top:6px">Lampiran</div>
+  <div class="chk"><input type="checkbox"><span>Peta Rencana Kerja</span></div>
+  <div class="chk"><input type="checkbox"><input class="ln" type="text"></div>
+ </div>
+ <table class="sig">
+  <tr><th>Disetujui oleh,</th><th>Diperiksa oleh,</th><th>Dibuat oleh,</th></tr>
+  <tr><td class="s"></td><td class="s"></td><td class="s"></td></tr>
+  <tr><td class="r"><input type="text" value="Manager" style="text-align:center"></td><td class="r"><input type="text" style="text-align:center"></td><td class="r"><input type="text" style="text-align:center"></td></tr>
+ </table>
+</div>
+
+</div></div>
+<script>
+var I='<td><input type="text"></td>';
+var ob=document.querySelector('#op tbody');
+for(var i=1;i<=5;i++){
+ ob.insertAdjacentHTML('beforeend','<tr><td class="n">'+i+'</td>'+I+I+I+'<td><input type="text" class="luas"></td><td><input type="text" class="hk"></td>'+I+'<td><input type="text" class="open"></td><td><input type="text" class="close"></td><td class="pct"></td>'+I+'</tr>');
+}
+function v(e){return parseFloat(String(e.value).replace(',','.'))||0}
+function sum(c){var s=0;document.querySelectorAll('#op .'+c).forEach(function(e){s+=v(e)});return s}
+function f(x){return Math.round(x*100)/100}
+function calc(){
+ document.querySelectorAll('#op tbody tr').forEach(function(r){
+  var o=v(r.querySelector('.open')),c=v(r.querySelector('.close'));
+  r.querySelector('.pct').textContent=o?f(c/o*100)+'%':'';
+ });
+ var o=sum('open'),c=sum('close');
+ tLuas.textContent=f(sum('luas'))||'';tHK.textContent=f(sum('hk'))||'';
+ tOpen.textContent=f(o)||'';tClose.textContent=f(c)||'';tPct.textContent=o?f(c/o*100)+'%':'';
+}
+document.getElementById('op').addEventListener('input',calc);
+
+// Unit Kerja: 1-15 | 16-30
+var u='<colgroup>'+[3,9,8.5,16.5,7,6,3,9,8.5,16.5,7,6].map(function(w){return '<col style="width:'+w+'%">'}).join('')+'</colgroup>';
+var uh='<th rowspan="2">No</th><th rowspan="2">Unit Kerja<br>Kode Unit</th><th colspan="2">Data Karyawan</th><th rowspan="2">Est<br>HM/KM/Rit</th><th rowspan="2">Est HK</th>';
+u+='<thead><tr><th colspan="12">Unit Kerja</th></tr><tr>'+uh+uh+'</tr><tr>'+'<th>NIK</th><th>Nama</th>'+'<th>NIK</th><th>Nama</th>'+'</tr></thead><tbody>';
+function ur(n){return '<td class="n">'+n+'</td>'+I+I+I+I+I}
+for(var i=1;i<=15;i++)u+='<tr>'+ur(i)+ur(i+15)+'</tr>';
+document.getElementById('uk').innerHTML=u+'</tbody>';
+// perbaiki header Unit Kerja (3 baris -> 2 baris + sub NIK/Nama)
+document.querySelector('#uk thead').innerHTML='<tr><th colspan="12">Unit Kerja</th></tr><tr>'+
+ '<th rowspan="2">No</th><th rowspan="2">Unit Kerja<br>Kode Unit</th><th colspan="2">Data Karyawan</th><th rowspan="2">Est<br>HM/KM/Rit</th><th rowspan="2">Est HK</th>'+
+ '<th rowspan="2">No</th><th rowspan="2">Unit Kerja<br>Kode Unit</th><th colspan="2">Data Karyawan</th><th rowspan="2">Est<br>HM/KM/Rit</th><th rowspan="2">Est HK</th></tr>'+
+ '<tr><th>NIK</th><th>Nama</th><th>NIK</th><th>Nama</th></tr>';
+
+// Man Power Support: 1-10 | 11-20
+var m='<colgroup>'+[3,9,20,11,7,3,9,20,11,7].map(function(w){return '<col style="width:'+w+'%">'}).join('')+'</colgroup>';
+var mh='<th>No</th><th>NIK</th><th>Nama</th><th>Jabatan</th><th>Est HK</th>';
+m+='<thead><tr><th colspan="10">Man Power Support</th></tr><tr>'+mh+mh+'</tr></thead><tbody>';
+function mr(n){return '<td class="n">'+n+'</td>'+I+I+I+I}
+for(var i=1;i<=10;i++)m+='<tr>'+mr(i)+mr(i+10)+'</tr>';
+document.getElementById('mp').innerHTML=m+'</tbody>';
+
+function clearAll(){
+ if(!confirm('Kosongkan semua isian?'))return;
+ document.querySelectorAll('.paper input').forEach(function(e){if(e.type==='checkbox')e.checked=false;else e.value=''});
+ calc();
+}
+</script>
+</body>
+</html>
